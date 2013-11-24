@@ -1,6 +1,6 @@
-*.class
-
-# Package Files #
+/build/
+/nbproject/
+/text/
 *.jar
-*.war
-*.ear
+manifest.mf
+/dist/
