@@ -63,10 +63,10 @@ public class Vertex {
      * @param processor
      * @return час закінчення даної вершини на процесорі
      */
-    public int placeOnProcessor(int start_time, int processor, int lats_end){
+    public int placeOnProcessor(int start_time, int processor, int last_end){
         this.start_time = start_time;
         this.processor = processor;
-        this.transiting_time = start_time - lats_end;
+        this.transiting_time = start_time - last_end;
         
         return start_time + weight;
     }
@@ -76,14 +76,20 @@ public class Vertex {
         transiting_time = 0;
         start_time = 0;
     }
-    
-    public int readyTime(int processor){
+    /**
+     * Час можливого початку роботи на даному процесорі
+     * @param processor_time
+     * @param processor
+     * @return 
+     */
+    public int readyTime(int processor_time, int processor){
         int ready_time = 0;
         for (int i = 0; i < back_connections.size(); i++) {
             int curr_ready_time = 0;
             Vertex supply = back_connections.get(i).start;
             if(supply.processor != -1){
                 curr_ready_time += supply.start_time + supply.weight;
+                curr_ready_time = (curr_ready_time > processor_time)? curr_ready_time: processor_time;
                 if(supply.processor != processor){
                     curr_ready_time += back_connections.get(i).weight;
                 }

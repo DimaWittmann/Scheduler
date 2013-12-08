@@ -1,5 +1,6 @@
 package course.GUI;
 
+import course.Main;
 import java.awt.Color;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -40,6 +41,7 @@ public class GnattDiagram extends ApplicationFrame{
 
         final CategoryPlot plot = (CategoryPlot) chart.getPlot();
         final StackedBarRenderer renderer = (StackedBarRenderer) plot.getRenderer();
+        renderer.setBaseItemLabelGenerator(new LableGenerator(Main.g.vertexes));
         renderer.setItemLabelsVisible(true);
         for (int i = 0; i < data.length/2; i++) {
             renderer.setSeriesPaint(i*2, new Color(0, 0, 0, 0));

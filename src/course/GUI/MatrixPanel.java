@@ -1,8 +1,6 @@
 package course.GUI;
 
-import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -24,7 +22,7 @@ public class MatrixPanel extends JPanel{
         this.setLayout(new GridLayout(size, size, 5, 5));
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                this.add(new JTextField("0", 2));
+                this.add(new JTextField("", 2));
             }
         }
     }
@@ -42,5 +40,11 @@ public class MatrixPanel extends JPanel{
             }
         }
         return data;
+    }
+    
+    public void setData(int data[][]){
+        for (int i = 0; i < data.length*data.length; i++) {
+            ((JTextField) this.getComponent(i)).setText(String.valueOf(data[i/data.length][i %data.length]));
+        }
     }
 }

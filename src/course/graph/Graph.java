@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -20,8 +22,7 @@ public class Graph {
     public Graph() {
         vertexes = new ArrayList<>();
     }
-    
-    
+
     
     public void initGraph(int [][] transitions, int [] vertexWeight){
         this.transitions = transitions;
@@ -218,7 +219,7 @@ public class Graph {
             int free_proc = getFreeProc(processors_time);
             int i = 0;
             while (i < waiting_vertexes.size()){
-                int ready_time = waiting_vertexes.get(i).readyTime(free_proc);
+                int ready_time = waiting_vertexes.get(i).readyTime(processors_time[free_proc], free_proc);
                 if(ready_time >= 0){
                     processors_time[free_proc] = waiting_vertexes.get(i).placeOnProcessor(ready_time, free_proc, processors_time[free_proc]);
                     waiting_vertexes.remove(i);
@@ -231,11 +232,82 @@ public class Graph {
         }
     }
     
-    public double [][] generateVisData(){
-        double [][] data = new double[CP_length*2][proc_number];
+    public void extendedPlanning(){
         for (Vertex vertex : vertexes) {
-            data[vertex.level*2-2][vertex.processor] = vertex.transiting_time;
-            data[vertex.level*2-1][vertex.processor] = vertex.weight;
+            vertex.reset();
+        }
+        
+        proc_number = findMaxP();
+        
+        int [] processors_time = new int [proc_number];
+        
+        List<Vertex> waiting_vertexes = new ArrayList(vertexes);
+        
+        while(!waiting_vertexes.isEmpty()){
+            if(waiting_vertexes.get(0).back_connections.isEmpty()){
+                int free_proc = getFreeProc(processors_time);
+                processors_time[free_proc] = waiting_vertexes.get(0).placeOnProcessor(0, free_proc, processors_time[free_proc]);
+                waiting_vertexes.remove(0);
+            }
+            
+            int i = 0;
+            while (i < waiting_vertexes.size()){
+                if(getFreeProc(processors_time) > 0){
+                    int finish_time = 0;
+                    int curr_proc = 0;
+                    int ready_time = 0;
+                    for (int proc = 0; proc < proc_number; proc++) {
+                        int curr_ready_time = waiting_vertexes.get(i).readyTime(processors_time[proc], proc);
+                        int curr_finish_time = curr_ready_time + waiting_vertexes.get(i).weight;
+                        if(proc == 0){
+                            finish_time = curr_finish_time;
+                            proc = curr_proc;
+                            ready_time = curr_ready_time;
+                        }
+                        if(curr_finish_time<finish_time){
+                            curr_proc = proc;
+                            finish_time = curr_finish_time;
+                            ready_time = curr_ready_time;
+                        }
+                    }
+                    processors_time[curr_proc] = waiting_vertexes.get(i).placeOnProcessor(ready_time, curr_proc, processors_time[curr_proc]);
+                    waiting_vertexes.remove(i);
+
+                }else{
+                    i++;
+                }
+
+            }
+        }
+        proc_number = findMaxP();
+        try {
+            CP_length = findLongestPath().size();
+        } catch (Exception ex) {
+            Logger.getLogger(Graph.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+    
+    public int getLongestProcessor(){
+        int max_proc_length = 0;
+        int proc_lengs[] = new int[proc_number];
+        for (Vertex vertex : vertexes) {
+            proc_lengs[vertex.processor]++;
+            max_proc_length = (max_proc_length<proc_lengs[vertex.processor])? proc_lengs[vertex.processor]:max_proc_length;
+        }
+        return max_proc_length;
+    }
+    
+    public double [][] generateVisData(){
+        
+        
+        
+        double [][] data = new double[getLongestProcessor()*2][proc_number];
+        int busy_proc[] = new int[proc_number];
+        for (Vertex vertex : vertexes) {
+            data[busy_proc[vertex.processor]*2][vertex.processor] = vertex.transiting_time;
+            data[busy_proc[vertex.processor]*2+1][vertex.processor] = vertex.weight;
+            busy_proc[vertex.processor]++;
         }
         return data;
     }

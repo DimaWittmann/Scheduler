@@ -38,4 +38,9 @@ public class VectorPanel extends JPanel{
         return data;
     }
     
+    public void setData(int [] data){
+        for (int i = 0; i < size; i++) {
+            ((JTextField)this.getComponent(i)).setText(String.valueOf(data[i]));
+        }
+    }
 }

@@ -3,7 +3,6 @@ package course.GUI;
 import course.Main;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.util.logging.Level;
@@ -21,27 +20,25 @@ import javax.swing.JTextField;
  */
 public class InputFrame extends JFrame{
 
-    private final MatrixPanel matrixPanel;
-    private final VectorPanel vectorPanel;
+    public final MatrixPanel matrixPanel;
+    public final VectorPanel vectorPanel;
     private final JTextField sizeField;
     private int size;
     private final Main main;
     
-    public InputFrame(final Main main) throws HeadlessException {
+    public InputFrame(final Main main, int size) throws HeadlessException {
         super("Input Panel");
         
         this.main = main;
+        this.size = size;
         
-        size = 5;
         matrixPanel = new MatrixPanel(size);
         vectorPanel = new VectorPanel(size);
      
         JPanel globalPanel = new JPanel();
-        globalPanel.setLayout(new GridLayout(3, 1, 5, 5));
+        globalPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         globalPanel.add(vectorPanel);
         globalPanel.add(matrixPanel);
-        
-        
         
         sizeField = new JTextField(3);
         sizeField.setText(String.valueOf(this.size));
@@ -64,18 +61,29 @@ public class InputFrame extends JFrame{
                     InputFrame.this.pack();
                 }
             };
-        
-        AbstractAction newData = new AbstractAction() {
+        AbstractAction simplePlanning = new AbstractAction() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    main.updateDiagram(matrixPanel.getData(), vectorPanel.getData());
+                    main.updateDiagram(matrixPanel.getData(), vectorPanel.getData(), false);
                 } catch (Exception ex) {
                     Logger.getLogger(InputFrame.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         };
+        AbstractAction optimazedPlanning = new AbstractAction() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    main.updateDiagram(matrixPanel.getData(), vectorPanel.getData(), true);
+                } catch (Exception ex) {
+                    Logger.getLogger(InputFrame.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        };
+        
         
         sizeField.setAction(resizeAction);
         
@@ -86,9 +94,12 @@ public class InputFrame extends JFrame{
         customPanel.add(new JLabel("Size: "));
         customPanel.add(sizeField);
         
-        JButton updateButton = new JButton(newData);
-        updateButton.setText("Update");
-        customPanel.add(updateButton);
+        JButton simpleButton = new JButton(simplePlanning);
+        simpleButton.setText("Simple solutuion");
+        customPanel.add(simpleButton);
+        JButton optimumButton = new JButton(optimazedPlanning);
+        optimumButton.setText("Optimum solution");
+        customPanel.add(optimumButton);
         
         this.add(customPanel, BorderLayout.SOUTH);
         this.pack();
